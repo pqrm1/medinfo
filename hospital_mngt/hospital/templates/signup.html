@@ -18,13 +18,27 @@
             <h3 class="text-center mb-4">Create New Account</h3>
 
             <ul class="nav nav-pills mb-4 justify-content-center" role="tablist">
-                <li class="nav-item"><a class="nav-link active px-4 py-2" data-bs-toggle="pill" href="#doctor">Doctor</a></li>
+                <li class="nav-item"><a class="nav-link active px-4 py-2" data-bs-toggle="pill" href="#admin">Admin</a></li>
+                <li class="nav-item"><a class="nav-link px-4 py-2" data-bs-toggle="pill" href="#staff">Staff</a></li>
+                <li class="nav-item"><a class="nav-link px-4 py-2" data-bs-toggle="pill" href="#doctor">Doctor</a></li>
                 <li class="nav-item"><a class="nav-link px-4 py-2" data-bs-toggle="pill" href="#patient">Patient</a></li>
             </ul>
 
             <div class="tab-content">
+                <!-- Admin Signup -->
+                <div id="admin" class="tab-pane active">
+                    <form method="post" action="{% url 'admin_signup' %}">
+                        {% csrf_token %}
+                        <div class="mb-3"><input type="text" name="username" class="form-control form-control-lg" placeholder="Username" required></div>
+                        <div class="mb-3"><input type="email" name="email" class="form-control form-control-lg" placeholder="Email (optional)"></div>
+                        <div class="mb-3"><input type="password" name="password" class="form-control form-control-lg" placeholder="Password" required></div>
+                        <div class="mb-3"><input type="password" name="password2" class="form-control form-control-lg" placeholder="Confirm Password" required></div>
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold">Register as Admin</button>
+                    </form>
+                </div>
+
                 <!-- Doctor Signup -->
-                <div id="doctor" class="tab-pane active">
+                <div id="doctor" class="tab-pane fade">
                     <form method="post" action="{% url 'doctor_signup' %}">
                         {% csrf_token %}
                         <div class="mb-3"><input type="text" name="name" class="form-control form-control-lg" placeholder="Full Name" required></div>

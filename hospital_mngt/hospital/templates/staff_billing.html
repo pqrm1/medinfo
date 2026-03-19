@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Portal — Billing{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 bg-light border-end min-vh-100">
+            <div class="p-4 sticky-top">
+                <h5 class="fw-bold text-primary"><i class="fas fa-user-shield me-2"></i>Staff Portal</h5>
+                <hr>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_dashboard' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_view_doctors' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-user-md me-3"></i>Doctors
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_view_patients' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-users me-3"></i>Patients
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_billing' %}" class="nav-link active bg-primary text-white rounded-pill px-4 py-3">
+                            <i class="fas fa-credit-card me-3"></i>Billing
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <a href="{% url 'logout_admin' %}" class="btn btn-outline-danger w-100 py-3 rounded-pill">
+                    <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold">Billing</h2>
+                        <p class="text-muted mb-0">Review and update patient bills.</p>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="mb-0">Total Due</h5>
+                                <h3 class="text-danger fw-bold">NPR {{ total_due|floatformat:2 }}</h3>
+                            </div>
+                            <div>
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                                </a>
+                            </div>
+                        </div>
+
+                        {% if bills %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Bill #</th>
+                                            <th>Patient</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Due</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for bill in bills %}
+                                            <tr>
+                                                <td>{{ bill.bill_number }}</td>
+                                                <td>{{ bill.patient.Name }}</td>
+                                                <td>{{ bill.issue_date }}</td>
+                                                <td class="fw-bold">NPR {{ bill.total_amount }}</td>
+                                                <td class="fw-bold text-danger">NPR {{ bill.balance_due }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if bill.status == 'paid' %}success{% elif bill.status == 'partial' %}warning{% else %}danger{% endif %}">
+                                                        {{ bill.status|title }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="d-inline-flex gap-2">
+                                                        <a href="#" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-file-invoice"></i>
+                                                        </a>
+                                                        {% if bill.status != 'paid' %}
+                                                            <form method="post" action="{% url 'mark_bill_paid' bill.id %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-sm btn-success">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No bills found</h5>
+                                <p class="text-muted">Bills will appear once appointments are completed.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

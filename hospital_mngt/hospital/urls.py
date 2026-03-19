@@ -4,14 +4,15 @@ from django.conf.urls.static import static
 
 from .views import (
     About, Home, Contact,
-    main_login, admin_login, doctor_login, patient_login,
-    Logout_admin, Index,
+    main_login, admin_login, staff_login, doctor_login, patient_login,
+    Logout_admin, Index, staff_dashboard,
+    staff_view_doctors, staff_view_patients, staff_billing, mark_bill_paid,
     View_Doctor, Delete_Doctor, Add_Doctor,
     View_Patient, Delete_Patient, Add_Patient,
     View_Appointment, Add_Appointment, Delete_Appointment,
-    signup, doctor_signup, patient_signup,  
-    patient_dashboard,doctor_dashboard,doctor_appointments, doctor_prescriptions,doctor_my_patients,
-    patient_book_appointment, patient_appointments,cancel_appointment, prescribe_medicine#
+    signup, admin_signup, staff_signup, doctor_signup, patient_signup,
+    patient_dashboard, doctor_dashboard, doctor_appointments, doctor_prescriptions, doctor_my_patients,
+    patient_book_appointment, patient_appointments, cancel_appointment, prescribe_medicine,
 )
 
 urlpatterns = [
@@ -25,9 +26,12 @@ urlpatterns = [
     # Login & Signup
     path('login/', main_login, name='main_login'),
     path('admin-login/', admin_login, name='admin_login'),
+    path('staff-login/', staff_login, name='staff_login'),
     path('doctor-login/', doctor_login, name='doctor_login'),
     path('patient-login/', patient_login, name='patient_login'),
     path('signup/', signup, name='signup'),
+    path('admin-signup/', admin_signup, name='admin_signup'),
+    path('staff-signup/', staff_signup, name='staff_signup'),
     path('doctor-signup/', doctor_signup, name='doctor_signup'),
     path('patient-signup/', patient_signup, name='patient_signup'),
 
@@ -35,7 +39,14 @@ urlpatterns = [
 
     # Dashboards
     path('index/', Index, name='dashboard'),
+    path('staff-dashboard/', staff_dashboard, name='staff_dashboard'),
     path('patient-dashboard/', patient_dashboard, name='patient_dashboard'),
+
+    # Staff portal (new)
+    path('staff/doctors/', staff_view_doctors, name='staff_view_doctors'),
+    path('staff/patients/', staff_view_patients, name='staff_view_patients'),
+    path('staff/billing/', staff_billing, name='staff_billing'),
+    path('staff/bill/<int:bill_id>/pay/', mark_bill_paid, name='mark_bill_paid'),
 
     # Admin CRUD
     path('view_doctor/', View_Doctor, name='view_doctor'),

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Portal — Doctors{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 bg-light border-end min-vh-100">
+            <div class="p-4 sticky-top">
+                <h5 class="fw-bold text-primary"><i class="fas fa-user-shield me-2"></i>Staff Portal</h5>
+                <hr>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_dashboard' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_view_doctors' %}" class="nav-link active bg-primary text-white rounded-pill px-4 py-3">
+                            <i class="fas fa-user-md me-3"></i>Doctors
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_view_patients' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-users me-3"></i>Patients
+                        </a>
+                    </li>
+                    <li class="nav-item mb-3">
+                        <a href="{% url 'staff_billing' %}" class="nav-link text-primary border rounded-pill px-4 py-3">
+                            <i class="fas fa-credit-card me-3"></i>Billing
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <a href="{% url 'logout_admin' %}" class="btn btn-outline-danger w-100 py-3 rounded-pill">
+                    <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold">Doctors</h2>
+                        <p class="text-muted mb-0">View and manage registered doctors.</p>
+                    </div>
+                    <a href="{% url 'add_doctor' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>Add Doctor
+                    </a>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        {% if doctors %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Mobile</th>
+                                            <th>Specialty</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doctor in doctors %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ doctor.Name }}</td>
+                                                <td>{{ doctor.Mobile }}</td>
+                                                <td>{{ doctor.Special }}</td>
+                                                <td class="text-end">
+                                                    <a href="{% url 'delete_doctor' doctor.id %}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Delete this doctor?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-user-md fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No doctors found</h5>
+                                <p class="text-muted">Start by adding a new doctor.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

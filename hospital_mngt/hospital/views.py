@@ -1,10 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Doctor, Patient, Appointment, Prescription, PrescriptionItem
 from datetime import date
 from datetime import date as dt_date
-from .models import Patient, MedicalFile, Appointment  # ← ADD MedicalFile here
+
+from .models import (
+    Doctor,
+    Patient,
+    Appointment,
+    MedicalFile,
+    Prescription,
+    PrescriptionItem,
+    Bill,
+    BillItem,
+)
 
 
 # ===================== PUBLIC PAGES =====================
@@ -26,15 +36,30 @@ def main_login(request):
 
 
 def admin_login(request):
+    """Login view for admin/superuser accounts."""
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_superuser:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Invalid admin username or password")
+    return redirect('main_login')
+
+
+def staff_login(request):
+    """Login view for non-superuser staff accounts."""
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None and user.is_staff:
             login(request, user)
-            return redirect('dashboard')
+            return redirect('staff_dashboard')
         else:
-            messages.error(request, "Invalid admin username or password")
+            messages.error(request, "Invalid staff username or password")
     return redirect('main_login')
 
 
@@ -98,6 +123,7 @@ def Logout_admin(request):
 
 # ===================== ADMIN DASHBOARD & FUNCTIONS =====================
 def Index(request):
+    """Admin dashboard (original admin portal)."""
     if not request.user.is_authenticated or not request.user.is_staff:
         return redirect('main_login')
 
@@ -107,6 +133,74 @@ def Index(request):
 
     context = {'d': d_count, 'p': p_count, 'a': a_count}
     return render(request, 'index.html', context)
+
+
+def staff_dashboard(request):
+    """Staff portal dashboard (separate from admin)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('main_login')
+
+    doctor_count = Doctor.objects.count()
+    patient_count = Patient.objects.count()
+    appointment_count = Appointment.objects.count()
+
+    unpaid_bills = Bill.objects.filter(status__in=['unpaid', 'partial'])
+    unpaid_count = unpaid_bills.count()
+    total_due = sum(b.balance_due for b in unpaid_bills)
+
+    context = {
+        'doctor_count': doctor_count,
+        'patient_count': patient_count,
+        'appointment_count': appointment_count,
+        'unpaid_count': unpaid_count,
+        'total_due': total_due,
+    }
+    return render(request, 'staff_dashboard.html', context)
+
+
+def staff_view_doctors(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('main_login')
+
+    doctors = Doctor.objects.all().order_by('Name')
+    return render(request, 'staff_view_doctors.html', {'doctors': doctors})
+
+
+def staff_view_patients(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('main_login')
+
+    patients = Patient.objects.all().order_by('Name')
+    return render(request, 'staff_view_patients.html', {'patients': patients})
+
+
+def staff_billing(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('main_login')
+
+    bills = Bill.objects.all().order_by('-issue_date')
+    unpaid_bills = bills.filter(status__in=['unpaid', 'partial'])
+    total_due = sum(b.balance_due for b in unpaid_bills)
+
+    context = {
+        'bills': bills,
+        'total_due': total_due,
+    }
+    return render(request, 'staff_billing.html', context)
+
+
+def mark_bill_paid(request, bill_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('main_login')
+
+    bill = get_object_or_404(Bill, id=bill_id)
+    if request.method == 'POST':
+        bill.paid_amount = bill.total_amount
+        bill.status = 'paid'
+        bill.save()
+        messages.success(request, f"Bill {bill.bill_number} marked as paid.")
+
+    return redirect('staff_billing')
 
 
 def View_Doctor(request):
@@ -262,6 +356,48 @@ def patient_signup(request):
 
     return redirect('signup')
 
+
+def admin_signup(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+
+        if not username or not password:
+            messages.error(request, "Username and password are required.")
+        elif password != password2:
+            messages.error(request, "Passwords do not match.")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken.")
+        else:
+            User.objects.create_superuser(username=username, email=email, password=password)
+            messages.success(request, "Admin account created successfully! You can now login.")
+            return redirect('main_login')
+
+    return redirect('signup')
+
+
+def staff_signup(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+
+        if not username or not password:
+            messages.error(request, "Username and password are required.")
+        elif password != password2:
+            messages.error(request, "Passwords do not match.")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken.")
+        else:
+            User.objects.create_user(username=username, email=email, password=password, is_staff=True)
+            messages.success(request, "Staff account created successfully! You can now login.")
+            return redirect('main_login')
+
+    return redirect('signup')
+
 def patient_dashboard(request):
     # Check if user is logged in as patient
     if request.session.get('user_type') != 'patient':
@@ -286,8 +422,6 @@ def patient_dashboard(request):
             description=description,
             file=file_obj
         )
-        # Optional: add success message
-        # messages.success(request, "File uploaded successfully!")
         return redirect('patient_dashboard')
 
     # Load data
