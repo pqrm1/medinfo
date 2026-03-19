@@ -13,7 +13,7 @@
         <p class="lead">Hospital Management System</p>
     </div>
 
-    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px; border-radius: 20px;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px; border-radius: 20px;">
         <div class="card-body">
             <h3 class="text-center mb-4">Create New Account</h3>
 
@@ -34,6 +34,18 @@
                         <div class="mb-3"><input type="password" name="password" class="form-control form-control-lg" placeholder="Password" required></div>
                         <div class="mb-3"><input type="password" name="password2" class="form-control form-control-lg" placeholder="Confirm Password" required></div>
                         <button type="submit" class="btn btn-success w-100 py-3 fw-bold">Register as Admin</button>
+                    </form>
+                </div>
+
+                <!-- Staff Signup -->
+                <div id="staff" class="tab-pane fade">
+                    <form method="post" action="{% url 'staff_signup' %}">
+                        {% csrf_token %}
+                        <div class="mb-3"><input type="text" name="username" class="form-control form-control-lg" placeholder="Username" required></div>
+                        <div class="mb-3"><input type="email" name="email" class="form-control form-control-lg" placeholder="Email (optional)"></div>
+                        <div class="mb-3"><input type="password" name="password" class="form-control form-control-lg" placeholder="Password" required></div>
+                        <div class="mb-3"><input type="password" name="password2" class="form-control form-control-lg" placeholder="Confirm Password" required></div>
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold">Register as Staff</button>
                     </form>
                 </div>
 

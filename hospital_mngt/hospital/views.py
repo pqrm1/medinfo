@@ -35,6 +35,10 @@ def main_login(request):
     return render(request, 'login.html')
 
 
+def signup(request):
+    return render(request, 'signup.html')
+
+
 def admin_login(request):
     """Login view for admin/superuser accounts."""
     if request.method == "POST":
